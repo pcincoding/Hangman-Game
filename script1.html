@@ -1,0 +1,214 @@
+<!-- <div class="element">I am element box</div>
+<h1 class="span">I am the sibling</h1>
+<script>
+    let content = document.getElementsByClassName('element')[0];
+    let span = document.getElementsByClassName('span')[0];
+    content.insertAdjacentElement("afterbegin",span);
+</script> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            background-color: #3fa5a5;
+            margin: 0 auto;
+            max-width: 80%;
+        }
+        #demo{
+            margin-top: 50px;
+        }
+        #reset{
+            float: right;
+        }
+        .disable{
+            pointer-events: none;
+            background-color: rgba(235, 29, 29, 0.452);
+            color: white;
+        }
+        .container{
+            position: absolute;
+            width: 30%;
+            height: 20%;
+            background-color: crimson;
+            color: #fff;
+            margin: 0 auto;
+            left: 30%;
+            text-align: center;
+            line-height: 2;
+        }
+        .lives{
+            text-align: center;
+            font-weight: 800;
+            font-size: 20px;
+            margin-top: 40px;
+            color: #fff;
+        }
+        .hide{
+            display: none;
+        }
+        h1{
+            text-align: center;
+            color: #07ff1b;
+            text-decoration: underline;
+        }
+        h2{
+            text-align: center;
+            color: #540e95;
+            margin-bottom: 30px;
+        }
+        .btn{
+            transition: 0.3s ease-out;
+        }
+        .btn:hover{
+            cursor: pointer;
+            font-size: 20px;
+            background-color: rgba(235, 29, 29, 0.452);
+            color: white;
+            transition: 0.3s ease-in;
+        }
+        .hello{
+            font-size: 23px;
+            font-weight: 900;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Hangman Game</h1>
+    <h2>Try Your Guess And Be The Victory</h2>
+    <div id="alphaButtons"></div>
+    <div id="demo" style=" width: 100%; display: inline-flex; justify-content: center; align-items: center;"></div>
+    <div class="lives">Remaining Life: 5</div>
+    <button id="hint" onclick="showHint()">Hint</button>
+    <button id="reset" onclick="reStart()">Reset</button>
+    <div class="container hide">
+        <div class="gameOver">Game Over!!!</div>
+        <div class="message">You Won</div>
+        <div class="correctWord">Correct Word:</div>
+        <button id="playagain">Play Again</button>
+    </div>
+    <script>
+        let hyphen = document.getElementById("demo");
+        let keyValues = new Map([
+            ["Prashant", "Just Joined Interns"],
+            ["Sujata", "Just Married to Raju"],
+            ["Basant", "Seeking for job"],
+            ["Purnima","My mom"],
+            ["Triyogi","My Dad"]
+        ]);
+        let selectnum = [...keyValues.keys()].length; //number of random data in map
+        let randomnum = Math.floor(Math.random() * selectnum);  //generates random data from the map
+        let randomKeys = [...keyValues.keys()][randomnum].toLowerCase(); //keys in the form of random data
+        let randomLetters = randomKeys.split('');// conversion of string into array form
+        let randomValues = [...keyValues.values()][randomnum];// values of the key-value pair of the generated random number
+        let container = document.getElementsByClassName('container')[0]; // container for the alert gameover
+        let message = document.getElementsByClassName('message')[0]; // messages about win/lose
+        let corrWord = document.getElementsByClassName('correctWord')[0]; // the correct word puzzle
+        let playAgain = document.getElementById('playagain'); // playagain the game
+        let randomkeyLength = Math.floor(Math.random()*randomKeys.length);
+        console.log(randomkeyLength);
+        
+        let lives = document.getElementsByClassName('lives')[0];  // lives available to the user
+        let life = 5;
+        let hint = document.getElementById('hint');
+        let reset = document.getElementById('reset');
+        let showHint = ()=>{              // hint function to show the hint for the entered button
+            hnt = document.getElementsByClassName('hnt')[0];
+            if(hnt){
+                
+                hnt.remove();
+            }
+            else{
+                hint.insertAdjacentHTML("beforebegin",`<div class='hnt'>Hint: `+randomValues+`</div>`);
+            }
+            
+        }
+        let reStart = ()=>{     // restarts the game for you    
+            location.reload(true);  //reloads the game for the next start
+        }
+
+
+        //creating buttons for alphabets
+        let alphaButtons = document.getElementById("alphaButtons");  //list of buttons on click
+        let letters = "abcdefghijklmnopqrstuvwxyz";  
+        let lettersArray = letters.split('');
+        for (let i = 0; i < lettersArray.length; i++) {
+            alphaButtons.insertAdjacentHTML("beforeend", `<button class='btn' style='margin:5px; padding: 10px; border: none;'>` + lettersArray[i].toUpperCase() + `</button>`);
+
+        }
+        let letter = document.querySelectorAll('.btn');   //accessing the function of the buttons in var. letter
+            letter.forEach(btn=> {
+                btn.addEventListener("click", btnPresses);
+        });
+        let getIndexes = (Presses) => {  //get the indexes for filling the array of the given puzzle
+            let indexList = [];
+            [...randomKeys].forEach((val, i) => {
+                if (Presses === val) {
+                    let index = i;
+                    indexList.push(index);
+                }
+            })
+            return indexList;  // returns the array of the indexList prepared to be filled.
+        };
+        let completeWord = () => {
+            let isComplete = true;
+            for (let i = 0; i < hyphen.children.length; i++) {
+                if (hyphen.children[i].textContent === "_") {
+                    isComplete = false;
+                }
+            }
+            return isComplete;
+        };
+
+        function btnPresses() {
+            let Presses = this.textContent.toLowerCase();
+                if (randomKeys.includes(Presses)) {
+                    let indexes = getIndexes(Presses);
+                    indexes.forEach((val, i) => {
+                        hyphen.children[val].textContent = this.textContent;
+                    })
+                    if (completeWord() && life!==1) {
+                        container.classList.remove('hide');
+                        message.innerText = "You Won";
+                        corrWord.innerText = "Correct Word: "+randomKeys;
+                        playAgain.addEventListener("click",reStart);
+                        letter.forEach(btn=>{btn.style.pointerEvents="none"});
+                    }
+                }
+                else {
+                    if(life==1){
+                        container.classList.remove('hide');
+                        message.innerText = "You Lose";
+                        corrWord.innerText = "Correct Word: "+randomKeys;
+                        playAgain.addEventListener("click",reStart);
+                        letter.forEach(btn=>{btn.style.pointerEvents="none"});
+                    }
+                    life--;
+                }
+            this.classList.add('disable');
+            lives.innerText ="Remaining Life: "+life;
+        };
+
+        for (var i = 0; i < randomKeys.length; i++) {
+
+            if (i == randomkeyLength) {
+                var html = `<p class="hello" style="padding:5px;">` + randomLetters[i].toUpperCase() + `</p>`;
+            }
+            else {
+                var html = `<p class="hello" style="padding:5px;">_</p>`;
+
+            }
+            hyphen.insertAdjacentHTML('beforeend', html);
+
+        }
+        
+
+    </script>
+</body>
+
+</html>
